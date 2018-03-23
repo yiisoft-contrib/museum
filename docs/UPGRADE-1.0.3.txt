@@ -1,0 +1,74 @@
+
+         Upgrading Instructions for Yii Framework v1.0.3
+         ===============================================
+
+!!!IMPORTANT!!!
+
+The following upgrading instructions are cumulative. That is,
+if you want to upgrade from version A to version C and there is
+version B between A and C, you need to following the instructions
+for both A and B.
+
+
+Upgrading from v1.0.2
+---------------------
+- Controllers that are organized in subdirectories are now referenced
+  using the ID format "path/to/xyz". Previously it was "path.to.xyz".
+  If you use "path.to.xyz" in your application, you have to modify it
+  to "path/to/xyz".
+
+- CHtml::coreScript() is removed. If you used this in your application,
+  please use the following alternative:
+
+  Yii::app()->clientScript->registerCoreScript($name);
+
+
+Upgrading from v1.0.1
+---------------------
+- Due to the introduction of the scenario-based massive assignment feature,
+  we removed CActiveRecord::protectedAttributes(). Please use safeAttributes()
+  to specify which attributes are safe to be massively assigned.
+
+  For more details about scenario-based assignment and validation,
+  please read the following tutorial section:
+
+  http://www.yiiframework.com/doc/guide/form.model#securing-attribute-assignments
+
+- The signature of CModel::validate() has been changed to:
+
+  CModel::validate($scenario='', $attributes=null)
+
+  That is, the order of the two parameters has been swapped. If your application
+  contains code that invokes the validate() method (of either a CFormModel
+  or a CActiveRecord object) with some parameter, please make sure you fix
+  the parameter order.
+
+- The usage of CActiveRecord::with() and the 'with' option in relations
+  has been changed. In order to query child relations, we should specify the 'with'
+  parameter/option like the following now:
+
+  Post::model()->with(array('comments', 'author.profile'))->findAll();
+
+  Previously, this should be written as:
+
+  Post::model()->with(array('comments', 'author'=>'profile'))->findAll();
+
+  If your code does not involve child relations (like 'profile' in the above),
+  nothing needs to be changed.
+
+  This change has been introduced in order to support dynamic relational
+  query options. For example, we can specify that comments be sorted in
+  descending order (assuming in the relations() method it is specified as
+  ascending order):
+
+  Post::model()->with(array(
+      'comments'=>array('order'=>'createTime DESC'),
+      'author.profile',
+  ))->findAll();
+
+
+Upgrading from v1.0.0
+---------------------
+- An $scenario parameter is added to both CModel::beforeValidate() and afterValidate().
+  If you override these methods in your child classes (form models, AR classes),
+  make sure you change the method signature accordingly.
